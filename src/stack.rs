@@ -1,5 +1,5 @@
 struct Stack {
-    stack: Vec<i32>,
+    stack: Vec<i16>,
     max_size: usize,
 }
 
@@ -15,7 +15,7 @@ impl Stack {
         self.stack.len()
     }
 
-    fn push(&mut self, value: i32) -> Result<(), &'static str> {
+    fn push(&mut self, value: i16) -> Result<(), &'static str> {
         if self.len() == self.max_size {
             return Err("stack-overflow");
         }
@@ -23,11 +23,11 @@ impl Stack {
         Ok(())
     }
 
-    fn pop(&mut self) -> Result<i32, &'static str> {
+    fn pop(&mut self) -> Result<i16, &'static str> {
         self.stack.pop().ok_or("stack-underflow")
     }
 
-    fn peek(&self) -> Option<&i32> {
+    fn peek(&self) -> Option<&i16> {
         self.stack.last()
     }
 
