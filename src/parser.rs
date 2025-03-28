@@ -112,43 +112,44 @@ fn parse_words(tokens: Vec<Token>) -> Result<Vec<Token>, &'static str> {
 }
 
 fn parse_conditionals(tokens: Vec<Token>) -> Result<Vec<Token>, &'static str> {
-    let mut parsed_tokens = Vec::new();
-    let mut if_stack = Vec::new();
+    let mut parsed = Vec::new();
+    let mut stack = Vec::new(); // Almacena posiciones de IF/ELSE
 
     for token in tokens {
         match token {
-            Token::Word(ref w) if w == "IF" => {
-                if_stack.push(parsed_tokens.len());
-                parsed_tokens.push(Token::Word("IF_START".to_string()));
+            Token::Word(w) if w == "IF" => {
+                stack.push((parsed.len(), false)); // (position, has_else)
+                parsed.push(Token::Word("IF".to_string()));
             }
-            Token::Word(ref w) if w == "ELSE" => {
-                if let Some(if_pos) = if_stack.last() {
-                    parsed_tokens[*if_pos] = Token::Word("IF_ELSE".to_string());
-                    if_stack.push(parsed_tokens.len());
-                    parsed_tokens.push(Token::Word("ELSE_START".to_string()));
+            Token::Word(w) if w == "ELSE" => {
+                if let Some((if_pos, has_else)) = stack.last_mut() {
+                    if *has_else {
+                        return Err("duplicate-else");
+                    }
+                    *has_else = true;
+                    parsed[*if_pos] = Token::Word("IF_ELSE".to_string());
+                    parsed.push(Token::Word("ELSE".to_string()));
                 } else {
                     return Err("unexpected-else");
                 }
             }
-            Token::Word(ref w) if w == "THEN" => {
-                if let Some(if_pos) = if_stack.pop() {
-                    parsed_tokens[if_pos] = Token::Word("IF_BLOCK".to_string());
-                    parsed_tokens.push(Token::Word("THEN_BLOCK".to_string()));
+            Token::Word(w) if w == "THEN" => {
+                if let Some((_, has_else)) = stack.pop() {
+                    parsed.push(Token::Word("THEN".to_string()));
                 } else {
                     return Err("unexpected-then");
                 }
             }
-            _ => parsed_tokens.push(token),
+            _ => parsed.push(token),
         }
     }
 
-    if !if_stack.is_empty() {
+    if !stack.is_empty() {
         return Err("unterminated-if");
     }
 
-    Ok(parsed_tokens)
+    Ok(parsed)
 }
-
 
 
 fn parse(input: &str) -> Result<Vec<Token>, &'static str> {
@@ -299,10 +300,10 @@ mod tests {
         assert_eq!(
             parsed,
             vec![
-                Token::Word("IF_BLOCK".to_string()),
+                Token::Word("IF".to_string()),
                 Token::Number(1),
                 Token::Word("<".to_string()),
-                Token::Word("THEN_BLOCK".to_string()),
+                Token::Word("THEN".to_string()),
             ]
         );
     }
@@ -325,9 +326,9 @@ mod tests {
                 Token::Word("IF_ELSE".to_string()),
                 Token::Number(1),
                 Token::Word("<".to_string()),
-                Token::Word("ELSE_START".to_string()),
+                Token::Word("ELSE".to_string()),
                 Token::Number(2),
-                Token::Word("THEN_BLOCK".to_string()),
+                Token::Word("THEN".to_string()),
             ]
         );
     }
@@ -361,10 +362,3 @@ mod tests {
 }
 
 
-
-
-fn main() {
-    let input = "IF 1 < 42 ELSE 100 THEN";    
-    let tokens = parse(input).unwrap();
-    println!("{:?}", tokens);
-}
