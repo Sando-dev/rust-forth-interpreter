@@ -38,7 +38,7 @@ fn main() {
 
     // Ejecutar el programa Forth
     if let Err(e) = interpreter.run(&input) {
-        eprintln!("Error en ejecución: {}", e);
+        eprintln!("{}", e);
         process::exit(1);
     }
 
@@ -47,9 +47,10 @@ fn main() {
         eprintln!("Error guardando el stack: {}", e);
         process::exit(1);
     }
+
+    println!();
 }
 
-/// Guarda el estado actual del stack en stack.fth
 fn save_stack(mut interpreter: Interpreter) -> std::io::Result<()> {
     let contents = interpreter.get_stack_contents(); // Mueve los datos
     let mut file = fs::File::create("stack.fth")?;

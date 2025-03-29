@@ -24,8 +24,8 @@ impl Interpreter {
         let mut iter = tokens.into_iter();
         while let Some(token) = iter.next() {
             match token {
-                Token::Number(num) => self.stack.push(num)?,   // Push números al stack
-                Token::Operand(op) => op.execute(&mut self.stack)?, // Ejecutar operación
+                Token::Number(num) => self.stack.push(num)?,  
+                Token::Operand(op) => op.execute(&mut self.stack)?, 
                 Token::Word(_word) => self.stack.push(2)?, //Cambiar despues
                 Token::DefStart => self.stack.push(1)?, //Cambiar despues
                 _ => return Err("Unexpected token"),

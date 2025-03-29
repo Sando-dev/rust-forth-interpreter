@@ -11,6 +11,8 @@ impl Stack {
         }
     }
 
+    
+    #[cfg(test)]
     pub fn default() -> Self {
         Self::new(128 * 1024 / std::mem::size_of::<i16>()) // 128 KB en i16
     }
@@ -31,6 +33,7 @@ impl Stack {
         self.stack.pop().ok_or("stack-underflow")
     }
 
+    #[cfg(test)]
     pub fn is_empty(&self) -> bool {
         self.stack.is_empty()
     }

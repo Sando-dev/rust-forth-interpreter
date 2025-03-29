@@ -1,4 +1,5 @@
 use crate::stack::Stack;
+use std::io::{self, Write}; 
 
 
 #[derive(Debug, PartialEq)]
@@ -10,7 +11,7 @@ pub enum Operation {
     Dup, Drop, Swap, Over, Rot,
 
     // Output
-    Dot, Emit, Cr, PrintString,
+    Dot, Emit, Cr, //PrintString,
 
     // Booleanas
     Eq, Lt, Gt, And, Or, Not,
@@ -88,7 +89,8 @@ impl Operation {
             // Output
             Self::Dot => {
                 let a = stack.pop()?;
-                println!("{}", a);
+                print!("{} ", a); 
+                io::stdout().flush().map_err(|_| "flush failed")?; // Fuerza la salida inmediata
             }
 
             Self::Emit => {
@@ -98,11 +100,6 @@ impl Operation {
 
             Self::Cr => {
                 println!();
-            }
-
-            Self::PrintString => {
-                let a = stack.pop()?;
-                print!("{}", a as u8 as char);
             }
 
             // Booleanas
