@@ -1,21 +1,25 @@
-struct Stack {
+pub struct Stack {
     stack: Vec<i16>,
     max_size: usize,
 }
 
 impl Stack {
-    fn new(max_size: usize) -> Stack {
+    pub fn new(max_size: usize) -> Stack {
         Stack { 
             stack: Vec::with_capacity(max_size),
             max_size,
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn default() -> Self {
+        Self::new(128 * 1024 / std::mem::size_of::<i16>()) // 128 KB en i16
+    }
+
+    pub fn len(&self) -> usize {
         self.stack.len()
     }
 
-    fn push(&mut self, value: i16) -> Result<(), &'static str> {
+    pub fn push(&mut self, value: i16) -> Result<(), &'static str> {
         if self.len() == self.max_size {
             return Err("stack-overflow");
         }
@@ -23,17 +27,18 @@ impl Stack {
         Ok(())
     }
 
-    fn pop(&mut self) -> Result<i16, &'static str> {
+    pub fn pop(&mut self) -> Result<i16, &'static str> {
         self.stack.pop().ok_or("stack-underflow")
     }
 
-    fn peek(&self) -> Option<&i16> {
-        self.stack.last()
-    }
-
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.stack.is_empty()
     }
+
+    pub fn get_contents(&mut self) -> Vec<i16> {
+        std::mem::take(&mut self.stack) 
+    }
+
 }
 
 
@@ -77,11 +82,4 @@ mod test {
         assert_eq!(stack.pop(), Err("stack-underflow"));
     }
 
-    #[test]
-    fn test_peek() {
-        let mut stack = Stack::new(10);
-        stack.push(1).unwrap();
-        assert_eq!(stack.peek(), Some(&1));
-        assert!(!stack.is_empty());
-    }
 }
